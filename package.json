@@ -110,7 +110,7 @@
   "devDependencies": {
     "bitcore-build-zelcash": "git://github.com/zelcash/bitcore-build-zelcash#master",
     "brfs": "^1.2.0",
-    "chai": "^1.10.0",
+    "chai": "^4.2.0",
     "gulp": "^3.8.10",
     "sinon": "^1.13.0"
   },
