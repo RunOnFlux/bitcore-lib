@@ -1,5 +1,5 @@
 {
-  "name": "bitcore-lib-zelcash",
+  "name": "bitcore-lib",
   "version": "0.14.1",
   "lockfileVersion": 1,
   "requires": true,
@@ -666,9 +666,9 @@
       "integrity": "sha512-DYWGk01lDcxeS/K9IHPGWfT8PsJmbXRtRd2Sx72Tnb8pcYZQFF1oSDb8hJtS1vhp212q1Rzi5dUf9+nq0o9UIg==",
       "dev": true
     },
-    "bitcore-build-zelcash": {
-      "version": "git://github.com/zelcash/bitcore-build-zelcash.git#7971f305d53dd91e99a969b9626cec7aefcc271f",
-      "from": "git://github.com/zelcash/bitcore-build-zelcash.git#master",
+    "bitcore-build": {
+      "version": "git://github.com/runonflux/bitcore-build.git#7971f305d53dd91e99a969b9626cec7aefcc271f",
+      "from": "git://github.com/runonflux/bitcore-build.git#master",
       "dev": true,
       "requires": {
         "brfs": "^1.2.0",

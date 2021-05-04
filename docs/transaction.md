@@ -19,7 +19,7 @@ var transaction = new Transaction()
 
 ## Example constructing transactions v4
  ```javascript
- const bitcore = require('bitcore-lib-zelcash')
+ const bitcore = require('bitcore-lib')
  let transaction = new bitcore.Transaction()
  transaction.version = 4
  transaction.fOverwintered = true

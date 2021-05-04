@@ -1,18 +1,18 @@
 {
-  "name": "bitcore-lib-zelcash",
-  "main": "./bitcore-lib-zelcash.min.js",
+  "name": "bitcore-lib",
+  "main": "./bitcore-lib.min.js",
   "version": "0.14.0",
   "homepage": "http://bitcore.io",
   "authors": [
     "BitPay, Inc.",
     "Jack Grigg"
   ],
-  "description": "A pure, powerful core for your zelcash project.",
+  "description": "A pure, powerful core for your flux project.",
   "moduleType": [
     "globals"
   ],
   "keywords": [
-    "zelcash",
+    "flux",
     "bitcore",
     "btc",
     "satoshi"
