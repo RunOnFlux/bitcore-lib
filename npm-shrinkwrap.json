@@ -667,8 +667,8 @@
       "dev": true
     },
     "bitcore-build": {
-      "version": "git://github.com/runonflux/bitcore-build.git#7971f305d53dd91e99a969b9626cec7aefcc271f",
-      "from": "git://github.com/runonflux/bitcore-build.git#master",
+      "version": "https://github.com/runonflux/bitcore-build.git#7971f305d53dd91e99a969b9626cec7aefcc271f",
+      "from": "https://github.com/runonflux/bitcore-build.git#master",
       "dev": true,
       "requires": {
         "brfs": "^1.2.0",

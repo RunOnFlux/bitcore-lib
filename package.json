@@ -108,7 +108,7 @@
     "lodash": "=3.10.1"
   },
   "devDependencies": {
-    "bitcore-build": "git://github.com/runonflux/bitcore-build#master",
+    "bitcore-build": "https://github.com/runonflux/bitcore-build#master",
     "brfs": "^1.2.0",
     "chai": "^1.10.0",
     "gulp": "^3.8.10",
