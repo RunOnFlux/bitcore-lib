@@ -432,6 +432,46 @@ describe('Differential against bitcore-lib 8f5453f', function() {
     });
   });
 
+  describe('Base58', function() {
+    it('encodes, decodes and checks alike', function() {
+      var bufs = seq('base58', 64).map(function(b, i) {
+        var zeros = Buffer.alloc(i % 5);
+        return Buffer.concat([zeros, b.slice(0, i % 33)]);
+      });
+      bufs.push(Buffer.alloc(0), Buffer.alloc(1), Buffer.alloc(40), Buffer.from([0, 0, 1]), Buffer.alloc(25, 0xff));
+      bufs.forEach(function(buf, i) {
+        same('base58 ' + i, function(lib) {
+          var str = lib.encoding.Base58.encode(buf);
+          var check = lib.encoding.Base58Check.encode(buf);
+          return {
+            str: str,
+            back: lib.encoding.Base58.decode(str),
+            obj: new lib.encoding.Base58(buf).toString(),
+            fromString: new lib.encoding.Base58(str).toBuffer(),
+            check: check,
+            checkBack: lib.encoding.Base58Check.decode(check),
+            valid: lib.encoding.Base58.validCharacters(str),
+            checkValid: lib.encoding.Base58Check.validChecksum(check),
+            depsEncode: lib.deps.bs58.encode(buf),
+            depsDecode: Buffer.from(lib.deps.bs58.decode(str))
+          };
+        });
+      });
+      var strings = ['', '1', '11', ' 1', '1 ', '0', 'O', 'I', 'l', '\u00e9', 'z', '2NEpo7TZRRrLZSi2U', '1111111111'];
+      strings.forEach(function(str, i) {
+        same('base58 string ' + i, function(lib) {
+          return {
+            decode: outcome(function() { return lib.encoding.Base58.decode(str); }),
+            check: outcome(function() { return lib.encoding.Base58Check.decode(str); }),
+            valid: lib.encoding.Base58.validCharacters(str),
+            notString: outcome(function() { return lib.encoding.Base58.decode(Buffer.from(str)); }),
+            notBuffer: outcome(function() { return lib.encoding.Base58.encode(str); })
+          };
+        });
+      });
+    });
+  });
+
   describe('keys and addresses', function() {
     var N = OLD.crypto.Point.getN();
     var seeds = seq('privkey', 120).map(function(b) { return b.toString('hex'); });
