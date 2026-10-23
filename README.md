@@ -44,18 +44,6 @@ We're using Bitcore in production, as are [many others](http://bitcore.io#projec
 
 If you find a security issue, please email security@bitpay.com.
 
-## Building the Browser Bundle
-
-To build a bitcore-lib full bundle for the browser:
-
-```sh
-gulp browser
-```
-
-This will generate files named `bitcore-lib.js` and `bitcore-lib.min.js`.
-
-You can also use our pre-generated files
-
 ## Development & Tests
 
 ```sh
@@ -64,14 +52,16 @@ cd bitcore-lib
 npm install
 ```
 
-Run all the tests:
+Requires Node.js 24 or later. Run all the tests:
 
 ```sh
-gulp test
+npm test
 ```
 
-You can also run just the Node.js tests with `gulp test:node`, just the browser tests with `gulp test:browser`
-or create a test coverage report (you can open `coverage/lcov-report/index.html` to visualize it) with `gulp coverage`.
+`npm test` runs every file under `test/` in its own mocha process and checks
+each outcome against `test/inherited-failures.json`, the inherited upstream
+tests that fail at runonflux/bitcore-lib 8f5453f. A single file runs with
+`npx mocha test/<file>.js`.
 
 ## License
 

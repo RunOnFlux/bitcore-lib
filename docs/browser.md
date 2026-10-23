@@ -59,8 +59,3 @@ browserify --require ./index.js:bitcore-lib | uglifyjs > bitcore-lib.min.js
 ```sh
 browserify --require ./index.js:bitcore-mnemonic --external bitcore-lib | uglifyjs > bitcore-mnemonic.min.js
 ```
-
-In many of the modules you can also run the command to build a browser bundle:
-```sh
-gulp browser
-```
