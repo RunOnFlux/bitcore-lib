@@ -60,8 +60,12 @@ npm test
 
 `npm test` runs every file under `test/` in its own mocha process and checks
 each outcome against `test/inherited-failures.json`, the inherited upstream
-tests that fail at runonflux/bitcore-lib 8f5453f. A single file runs with
-`npx mocha test/<file>.js`.
+tests that fail at runonflux/bitcore-lib 8f5453f. `test/differential.js`
+checks this library against bitcore-lib 8f5453f, installed as the
+devDependency `bitcore-lib-8f5453f`, on Flux mainnet blocks and transactions
+(`test/data/flux-mainnet/corpus.json`, written by
+`scripts/fetch-mainnet-corpus.js`), keys, addresses, HD keys and signatures.
+A single file runs with `npx mocha test/<file>.js`.
 
 ## License
 

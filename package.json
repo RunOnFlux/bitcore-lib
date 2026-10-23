@@ -102,9 +102,18 @@
     "lodash": "=3.10.1"
   },
   "devDependencies": {
+    "bitcore-lib-8f5453f": "git+https://github.com/runonflux/bitcore-lib.git#8f5453fdcee462e30532f9f93884ebe6aff71ef9",
     "chai": "^6.3.0",
     "mocha": "^12.0.3",
     "sinon": "^22.1.0"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "overrides": {
+    "bitcore-lib-8f5453f": {
+      "elliptic": {
+        "brorand": "1.0.5",
+        "hash.js": "1.0.3"
+      }
+    }
+  }
 }
