@@ -4,6 +4,9 @@
   "description": "A pure and powerful JavaScript Flux library.",
   "author": "BitPay <dev@bitpay.com>",
   "main": "index.js",
+  "engines": {
+    "node": ">=24"
+  },
   "scripts": {
     "test": "node scripts/test.js"
   },
