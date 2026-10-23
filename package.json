@@ -94,10 +94,10 @@
     "url": "https://github.com/runonflux/bitcore-lib.git"
   },
   "dependencies": {
-    "bn.js": "=2.0.4",
+    "bn.js": "^5.2.5",
     "bs58": "=2.0.0",
     "buffer-compare": "=1.0.0",
-    "elliptic": "=3.0.3",
+    "elliptic": "^6.6.1",
     "inherits": "=2.0.1",
     "lodash": "=3.10.1"
   },
