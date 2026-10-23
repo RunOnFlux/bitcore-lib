@@ -678,6 +678,46 @@ describe('Differential against bitcore-lib 8f5453f', function() {
       });
     });
 
+    it('point arithmetic', function() {
+      // elliptic multiplies by non-negative scalars only; neither version
+      // gives k * P for a negative k.
+      var scalars = ['0', '1', '2', 'n-1', 'n', 'n+1', '2^256+5'].concat(seq('scalar', 10).map(function(b) {
+        return b.toString('hex');
+      }));
+      same('point arithmetic', function(lib) {
+        var BN = lib.crypto.BN;
+        var Point = lib.crypto.Point;
+        var n = Point.getN();
+        var toScalar = function(s) {
+          var table = { 'n-1': n.sub(new BN(1)), n: n, 'n+1': n.add(new BN(1)), '2^256+5': new BN(1).ushln ?
+            new BN(1).ushln(256).add(new BN(5)) : new BN(1).shln(256).add(new BN(5)) };
+          if (table[s]) {
+            return table[s];
+          }
+          return /^[0-9]$/.test(s) ? new BN(Number(s)) : new BN(s, 16);
+        };
+        var render = function(fn) {
+          return outcome(function() {
+            var q = fn();
+            return q.isInfinity() ? 'infinity' : { x: q.getX(), y: q.getY() };
+          });
+        };
+        var G = Point.getG();
+        var Q = new lib.PrivateKey(seq('pointkey', 1)[0].toString('hex')).toPublicKey().point;
+        return scalars.map(function(s) {
+          var k = toScalar(s);
+          return [
+            render(function() { return G.mul(k); }),
+            render(function() { return Q.mul(k); }),
+            render(function() { return G.mulAdd(k, Q, new BN(3)); }),
+            render(function() { return G.mul(k).add(Q); }),
+            outcome(function() { return G.mul(k).eq(Q.mul(k)); }),
+            outcome(function() { return lib.crypto.Point.pointToCompressed(Q.mul(k)); })
+          ];
+        });
+      });
+    });
+
     it('HD keys', function() {
       var paths = ['m', 'm/0', "m/0'", "m/0'/1", "m/0'/1/2'", "m/0'/1/2'/2/1000000000", "m/44'/19167'/0'/0/5",
         "m/44'/19167'/0'/1/0", 'm/2147483647', "m/2147483647'/1/2147483646'"];
