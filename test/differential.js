@@ -636,6 +636,40 @@ describe('Differential against bitcore-lib 8f5453f', function() {
     });
   });
 
+  describe('URI, Unit and Opcode', function() {
+    it('renders URIs, units and opcodes alike', function() {
+      var key = new OLD.PrivateKey(seq('uri', 1)[0].toString('hex'));
+      NETWORKS.forEach(function(network) {
+        var address = new OLD.PrivateKey(key.toString(), network).toAddress().toString();
+        same('uri ' + network, function(lib) {
+          var uri = new lib.URI({ address: address, amount: 123456789, message: 'm s', label: 'l&', r: 'https://x/y', other: 'o', 'req-x': 'z' });
+          return {
+            str: uri.toString(),
+            json: uri.toJSON(),
+            object: uri.toObject(),
+            parse: outcome(function() { return new lib.URI(uri.toString()).toObject(); }),
+            valid: lib.URI.isValid(uri.toString()),
+            inspect: uri.inspect()
+          };
+        });
+      });
+      same('units', function(lib) {
+        return [0, 1, 12345678, 2100000000000000].map(function(sat) {
+          var unit = lib.Unit.fromSatoshis(sat);
+          return [unit.toBTC(), unit.toMilis(), unit.toBits(), unit.toString(), unit.toObject(), unit.atRate(123.45)];
+        });
+      });
+      same('opcodes', function(lib) {
+        return {
+          map: lib.Opcode.map,
+          reverse: lib.Opcode.reverseMap,
+          dup: lib.Opcode.OP_DUP,
+          small: [0, 1, 16].map(function(n) { return lib.Opcode.smallInt(n).toString(); })
+        };
+      });
+    });
+  });
+
   describe('signatures', function() {
     var keys = seq('sigkey', 16).map(function(b) { return b.toString('hex'); });
     keys.push('01', OLD.crypto.Point.getN().sub(new OLD.crypto.BN(1)).toString(16));
