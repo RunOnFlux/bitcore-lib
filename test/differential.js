@@ -637,6 +637,47 @@ describe('Differential against bitcore-lib 8f5453f', function() {
       expect(rejected).to.be.above(50);
     });
 
+    it('rejects point coordinates at or above the field prime', function() {
+      var P = 'fffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f';
+      var bases = seq('fieldkey', 20).map(function(b) {
+        return new OLD.PrivateKey(b.toString('hex')).toPublicKey().point;
+      });
+      bases.forEach(function(point, i) {
+        var x = point.getX().toString(16);
+        var y = point.getY().toString(16);
+        same('field ' + i, function(lib) {
+          var BN = lib.crypto.BN;
+          var Point = lib.crypto.Point;
+          var p = new BN(P, 16);
+          var X = new BN(x, 16);
+          var Y = new BN(y, 16);
+          var run = function(fn) {
+            return outcome(function() {
+              var q = fn();
+              return { x: q.getX(), y: q.getY() };
+            });
+          };
+          return [
+            run(function() { return Point.fromX(Y.isOdd(), X.add(p)); }),
+            run(function() { return Point.fromX(!Y.isOdd(), X.add(p)); }),
+            run(function() { return Point.fromX(true, p); }),
+            run(function() { return Point.fromX(true, p.add(new BN(i + 1))); }),
+            run(function() { return new Point(X.add(p), Y); }),
+            run(function() { return new Point(X, Y.add(p)); }),
+            run(function() { return new Point(X.add(p), Y.add(p)); }),
+            run(function() { return new Point(X.add(p).add(p), Y); }),
+            run(function() { return new Point(X.toString(16), Y.toString(16)); }),
+            run(function() { return new Point(X.add(p).toString(16), Y.toString(16)); }),
+            run(function() { return new Point(new BN(0), Y.add(p)); }),
+            outcome(function() {
+              var buf = Buffer.concat([Buffer.from([0x04]), X.add(p).toBuffer({ size: 32 }), Y.toBuffer({ size: 32 })]);
+              return new lib.PublicKey(buf).toString();
+            })
+          ];
+        });
+      });
+    });
+
     it('HD keys', function() {
       var paths = ['m', 'm/0', "m/0'", "m/0'/1", "m/0'/1/2'", "m/0'/1/2'/2/1000000000", "m/44'/19167'/0'/0/5",
         "m/44'/19167'/0'/1/0", 'm/2147483647', "m/2147483647'/1/2147483646'"];
@@ -770,8 +811,9 @@ describe('Differential against bitcore-lib 8f5453f', function() {
                       e.hashbuf = hash;
                       e.sig = new lib.crypto.Signature({ r: sig.r, s: sig.s, i: i, compressed: compressed });
                       var x = i > 1 ? sig.r.add(lib.crypto.Point.getN()) : sig.r;
-                      var onCurve = opensslAccepts(Buffer.concat([Buffer.from([i % 2 ? 0x03 : 0x02]), x.toBuffer({ size: 32 })]));
-                      return onCurve && x.toBuffer().length === 32 ? e.toPublicKey().toString() : 'off curve';
+                      var aboveP = x.cmp(new lib.crypto.BN('fffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f', 16)) >= 0;
+                      var onCurve = !aboveP && opensslAccepts(Buffer.concat([Buffer.from([i % 2 ? 0x03 : 0x02]), x.toBuffer({ size: 32 })]));
+                      return aboveP || onCurve ? e.toPublicKey().toString() : 'off curve';
                     });
                   }),
                   staticSign: lib.crypto.ECDSA.sign(hash, key, endian).toString()
