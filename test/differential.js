@@ -2,7 +2,9 @@
 
 /**
  * Differential test against runonflux/bitcore-lib 8f5453f, installed as the
- * devDependency `bitcore-lib-8f5453f` with its own pinned dependencies.
+ * devDependency `bitcore-lib-8f5453f` (test/fixtures/bitcore-lib-8f5453f.tgz:
+ * index.js, lib, package.json and LICENSE at that commit) with its own pinned
+ * dependencies.
  *
  * Every check runs the same operation through both libraries and requires
  * identical output: serialisations byte for byte, JSON, hashes, addresses,

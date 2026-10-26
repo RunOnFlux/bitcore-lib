@@ -108,7 +108,7 @@
     "lodash": "^4.18.1"
   },
   "devDependencies": {
-    "bitcore-lib-8f5453f": "git+https://github.com/runonflux/bitcore-lib.git#8f5453fdcee462e30532f9f93884ebe6aff71ef9",
+    "bitcore-lib-8f5453f": "file:test/fixtures/bitcore-lib-8f5453f.tgz",
     "chai": "^6.3.0",
     "mocha": "^12.0.3",
     "sinon": "^22.1.0"
