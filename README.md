@@ -9,10 +9,23 @@ Flux is a powerful new peer-to-peer platform for the next generation of financia
 
 ## Get Started
 
+Requires Node.js 24 or newer.
+
+```
+npm install @runonflux/bitcore-lib
+```
+
+```javascript
+const bitcore = require('@runonflux/bitcore-lib');
+```
+
+To work on the library itself:
+
 ```
 git clone https://github.com/runonflux/bitcore-lib.git
 cd bitcore-lib
 npm install
+npm test
 ```
 
 

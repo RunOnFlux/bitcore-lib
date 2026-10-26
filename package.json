@@ -1,9 +1,13 @@
 {
-  "name": "bitcore-lib",
-  "version": "0.15.0",
+  "name": "@runonflux/bitcore-lib",
+  "version": "0.16.0",
   "description": "A pure and powerful JavaScript Flux library.",
   "author": "BitPay <dev@bitpay.com>",
   "main": "index.js",
+  "files": [
+    "index.js",
+    "lib"
+  ],
   "engines": {
     "node": ">=24"
   },
@@ -117,5 +121,8 @@
         "hash.js": "1.0.3"
       }
     }
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

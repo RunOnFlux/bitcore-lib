@@ -39,7 +39,7 @@ After this, you can include the bundled release versions in your HTML file:
 <body>
 
   <script type="text/javascript">
-    var bitcore = require('bitcore-lib');
+    var bitcore = require('@runonflux/bitcore-lib');
     var Mnemonic = require('bitcore-mnemonic');
     // etc...
   </script>
