@@ -2,20 +2,24 @@
 
 /**
  * Writes test/data/flux-mainnet/corpus.json: raw Flux mainnet blocks and
- * transactions from the public Insight explorer, with the hash, merkle root
- * and txids the explorer reports for each block.
+ * transactions from the public Insight explorer, with each block's hash and
+ * merkle root, and its txids as fluxd reports them (the Flux API's getblock):
+ * the explorer's own txids for fluxnode transactions come from this library.
  *
  * Usage: node scripts/fetch-mainnet-corpus.js [heights...]
+ *        node scripts/fetch-mainnet-corpus.js --txids
  *   With no heights it fetches the most recent blocks and a spread of
  *   heights across the chain. Transactions listed in EXTRA_TXIDS are fetched
  *   as raw transactions; the explorer serves no raw fluxnode transactions,
- *   which come from their blocks. Requests are sequential and spaced out.
+ *   which come from their blocks. --txids rewrites every block's txids from
+ *   fluxd and fetches nothing else. Requests are sequential and spaced out.
  */
 
 var fs = require('fs');
 var path = require('path');
 
 var API = 'https://explorer.runonflux.io/api';
+var FLUXD_API = 'https://api.runonflux.io';
 var OUT = path.resolve(__dirname, '..', 'test', 'data', 'flux-mainnet', 'corpus.json');
 var DELAY_MS = 300;
 var RECENT = 40;
@@ -37,13 +41,21 @@ function sleep(ms) {
   return new Promise(function(resolve) { setTimeout(resolve, ms); });
 }
 
-async function get(route) {
+async function get(route, base) {
   await sleep(DELAY_MS);
-  var res = await fetch(API + route);
+  var res = await fetch((base || API) + route);
   if (!res.ok) {
     throw new Error(route + ': HTTP ' + res.status);
   }
   return res.json();
+}
+
+async function fluxdTxids(hash) {
+  var answer = await get('/daemon/getblock?hashheight=' + hash + '&verbosity=1', FLUXD_API);
+  if (answer.status !== 'success') {
+    throw new Error('getblock ' + hash + ': ' + JSON.stringify(answer.data));
+  }
+  return answer.data.tx;
 }
 
 async function fetchBlock(hash) {
@@ -54,7 +66,7 @@ async function fetchBlock(hash) {
     hash: info.hash,
     version: info.version,
     merkleroot: info.merkleroot,
-    txids: info.tx,
+    txids: await fluxdTxids(hash),
     rawblock: raw.rawblock
   };
 }
@@ -67,6 +79,15 @@ async function main() {
   corpus.blocks.forEach(function(b) { have[b.hash] = true; });
   var haveTx = {};
   corpus.txs.forEach(function(t) { haveTx[t.txid] = true; });
+
+  if (process.argv[2] === '--txids') {
+    for (var b = 0; b < corpus.blocks.length; b++) {
+      corpus.blocks[b].txids = await fluxdTxids(corpus.blocks[b].hash);
+    }
+    fs.writeFileSync(OUT, JSON.stringify(corpus, null, 1) + '\n');
+    console.log(corpus.blocks.length + ' blocks: txids from fluxd');
+    return;
+  }
 
   var hashes = [];
   if (!listed) {

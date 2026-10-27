@@ -139,15 +139,29 @@ describe('Differential against bitcore-lib 8f5453f', function() {
       });
     });
 
+    // A fluxnode transaction's id leaves out its signatures, as fluxd's does; 8f5453f hashed
+    // them, so its ids for these transactions are not fluxd's and are left out of the comparison.
+    function isFluxnode(tx) {
+      return tx.version === 5 || tx.version === 6;
+    }
+
+    function withoutHash(object, fluxnode) {
+      if (fluxnode) {
+        delete object.hash;
+      }
+      return object;
+    }
+
     function checkTransaction(label, hex, txid) {
+      var fluxnode = isFluxnode(new NEW.Transaction(hex));
       var o = same(label + ' parse', function(lib) {
         var tx = new lib.Transaction(hex);
         return {
           hex: tx.toString(),
-          hash: tx.hash,
-          id: tx.id,
-          json: JSON.stringify(tx.toJSON()),
-          object: tx.toObject(),
+          hash: fluxnode ? undefined : tx.hash,
+          id: fluxnode ? undefined : tx.id,
+          json: fluxnode ? undefined : JSON.stringify(tx.toJSON()),
+          object: withoutHash(tx.toObject(), fluxnode),
           verify: outcome(function() { return tx.verify(); }),
           outputAmount: outcome(function() { return tx.outputAmount; }),
           coinbase: tx.isCoinbase(),
@@ -156,7 +170,7 @@ describe('Differential against bitcore-lib 8f5453f', function() {
       });
       expect(o.value.hex, label + ' round trip').to.equal(hex);
       if (txid) {
-        expect(o.value.hash, label + ' txid').to.equal(txid);
+        expect(new NEW.Transaction(hex).hash, label + ' txid').to.equal(txid);
       }
 
       same(label + ' from object', function(lib) {
@@ -271,6 +285,7 @@ describe('Differential against bitcore-lib 8f5453f', function() {
 
     corpus.blocks.forEach(function(entry) {
       it('block ' + entry.height + ' ' + entry.hash, function() {
+        var fluxnode = NEW.Block.fromString(entry.rawblock).transactions.some(isFluxnode);
         var o = same('block ' + entry.height, function(lib) {
           var block = lib.Block.fromString(entry.rawblock);
           return {
@@ -278,10 +293,10 @@ describe('Differential against bitcore-lib 8f5453f', function() {
             hash: block.hash,
             header: block.header.toObject(),
             headerHex: block.header.toString(),
-            json: JSON.stringify(block.toJSON()),
-            txids: block.transactions.map(function(tx) { return tx.hash; }),
-            merkleRoot: block.getMerkleRoot(),
-            validMerkleRoot: block.validMerkleRoot(),
+            json: fluxnode ? undefined : JSON.stringify(block.toJSON()),
+            txids: fluxnode ? undefined : block.transactions.map(function(tx) { return tx.hash; }),
+            merkleRoot: fluxnode ? undefined : block.getMerkleRoot(),
+            validMerkleRoot: fluxnode ? undefined : block.validMerkleRoot(),
             difficulty: outcome(function() { return block.header.getDifficulty(); }),
             target: outcome(function() { return block.header.getTargetDifficulty(); }),
             validProofOfWork: outcome(function() { return block.header.validProofOfWork(); }),
@@ -291,7 +306,9 @@ describe('Differential against bitcore-lib 8f5453f', function() {
         });
         expect(o.value.hex).to.equal(entry.rawblock);
         expect(o.value.hash).to.equal(entry.hash);
-        expect(o.value.txids).to.deep.equal(entry.txids);
+        var block = NEW.Block.fromString(entry.rawblock);
+        expect(block.transactions.map(function(tx) { return tx.hash; })).to.deep.equal(entry.txids);
+        expect(block.validMerkleRoot()).to.equal(true);
 
         same('block ' + entry.height + ' raw', function(lib) {
           var buf = Buffer.from(entry.rawblock, 'hex');
@@ -305,7 +322,7 @@ describe('Differential against bitcore-lib 8f5453f', function() {
           return new lib.Block(block.toObject()).toString();
         });
 
-        var block = OLD.Block.fromString(entry.rawblock);
+        block = OLD.Block.fromString(entry.rawblock);
         kind('block v' + block.header.version + (block.header.version >= 100 ? ' PoN' : ' PoW'));
         block.transactions.forEach(function(tx, i) {
           checkTransaction('block ' + entry.height + ' tx ' + i, tx.toString(), entry.txids[i]);
@@ -360,9 +377,20 @@ describe('Differential against bitcore-lib 8f5453f', function() {
             }
             var out = tx.toString();
             var back = new lib.Transaction(out);
-            return { hex: out, hash: back.hash, again: back.toString(), object: back.toObject() };
+            return { hex: out, again: back.toString(), object: withoutHash(back.toObject(), true) };
           });
           expect(o.value.again, label).to.equal(o.value.hex);
+          // The id covers the delegate data and not the signature
+          var tx = new NEW.Transaction(o.value.hex);
+          var resigned = new NEW.Transaction(o.value.hex);
+          resigned.zelnodeData.sig = Buffer.alloc(resigned.zelnodeData.sig.length, 0x5a);
+          expect(resigned.toString(), label + ' resigned').to.not.equal(o.value.hex);
+          expect(resigned.hash, label + ' id without the signature').to.equal(tx.hash);
+          if (variant.delegateData && variant.delegateData.delegates.length) {
+            var redelegated = new NEW.Transaction(o.value.hex);
+            redelegated.zelnodeData.delegateData.delegates[0] = Buffer.from(delegateKeys[2]);
+            expect(redelegated.hash, label + ' id with the delegates').to.not.equal(tx.hash);
+          }
           built++;
         });
       });
