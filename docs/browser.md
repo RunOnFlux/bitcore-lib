@@ -39,7 +39,7 @@ After this, you can include the bundled release versions in your HTML file:
 <body>
 
   <script type="text/javascript">
-    var bitcore = require('bitcore-lib');
+    var bitcore = require('@runonflux/bitcore-lib');
     var Mnemonic = require('bitcore-mnemonic');
     // etc...
   </script>
@@ -58,9 +58,4 @@ browserify --require ./index.js:bitcore-lib | uglifyjs > bitcore-lib.min.js
 
 ```sh
 browserify --require ./index.js:bitcore-mnemonic --external bitcore-lib | uglifyjs > bitcore-mnemonic.min.js
-```
-
-In many of the modules you can also run the command to build a browser bundle:
-```sh
-gulp browser
 ```

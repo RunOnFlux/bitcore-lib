@@ -9,10 +9,23 @@ Flux is a powerful new peer-to-peer platform for the next generation of financia
 
 ## Get Started
 
+Requires Node.js 24 or newer.
+
+```
+npm install @runonflux/bitcore-lib
+```
+
+```javascript
+const bitcore = require('@runonflux/bitcore-lib');
+```
+
+To work on the library itself:
+
 ```
 git clone https://github.com/runonflux/bitcore-lib.git
 cd bitcore-lib
 npm install
+npm test
 ```
 
 
@@ -44,18 +57,6 @@ We're using Bitcore in production, as are [many others](http://bitcore.io#projec
 
 If you find a security issue, please email security@bitpay.com.
 
-## Building the Browser Bundle
-
-To build a bitcore-lib full bundle for the browser:
-
-```sh
-gulp browser
-```
-
-This will generate files named `bitcore-lib.js` and `bitcore-lib.min.js`.
-
-You can also use our pre-generated files
-
 ## Development & Tests
 
 ```sh
@@ -64,14 +65,20 @@ cd bitcore-lib
 npm install
 ```
 
-Run all the tests:
+Requires Node.js 24 or later. Run all the tests:
 
 ```sh
-gulp test
+npm test
 ```
 
-You can also run just the Node.js tests with `gulp test:node`, just the browser tests with `gulp test:browser`
-or create a test coverage report (you can open `coverage/lcov-report/index.html` to visualize it) with `gulp coverage`.
+`npm test` runs every file under `test/` in its own mocha process and checks
+each outcome against `test/inherited-failures.json`, the inherited upstream
+tests that fail at runonflux/bitcore-lib 8f5453f. `test/differential.js`
+checks this library against bitcore-lib 8f5453f, installed as the
+devDependency `bitcore-lib-8f5453f`, on Flux mainnet blocks and transactions
+(`test/data/flux-mainnet/corpus.json`, written by
+`scripts/fetch-mainnet-corpus.js`), keys, addresses, HD keys and signatures.
+A single file runs with `npx mocha test/<file>.js`.
 
 ## License
 

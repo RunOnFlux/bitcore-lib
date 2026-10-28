@@ -1,0 +1,48 @@
+name: CI & Publish
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  release:
+    types: [published]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24.x"
+      # The lock is written by npm 12, which also runs install scripts only for packages the
+      # project approves (allowScripts).
+      - run: npm install -g npm@12.2.1
+      - run: npm ci
+      - run: npm test
+
+  publish:
+    needs: test
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24.x"
+          registry-url: "https://registry.npmjs.org"
+      - run: npm install -g npm@12.2.1
+      - name: Set version from release tag
+        run: |
+          VERSION="${{ github.event.release.tag_name }}"
+          VERSION="${VERSION#v}"
+          npm version "$VERSION" --no-git-tag-version --allow-same-version
+      - run: npm ci
+      - run: npm test
+      # The trusted publisher allows staging only: a maintainer approves each version on
+      # npmjs.com with 2FA before it is public.
+      - run: npm stage publish --provenance --access public

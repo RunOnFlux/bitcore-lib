@@ -61,7 +61,7 @@ bitcore.Unit = require('./lib/unit');
 // dependencies, subject to change
 bitcore.deps = {};
 bitcore.deps.bnjs = require('bn.js');
-bitcore.deps.bs58 = require('bs58');
+bitcore.deps.bs58 = require('bs58').default;
 bitcore.deps.Buffer = Buffer;
 bitcore.deps.elliptic = require('elliptic');
 bitcore.deps._ = require('lodash');
